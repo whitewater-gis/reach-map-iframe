@@ -28,7 +28,7 @@ require([
     var urlReachPutins = 'http://services.arcgis.com/SgB3dZDkkUxpEHxu/arcgis/rest/services/aw_reach_17_search/FeatureServer/1';
     var urlReachTakeouts = 'http://services.arcgis.com/SgB3dZDkkUxpEHxu/arcgis/rest/services/aw_reach_17_search/FeatureServer/2';
     var urlUsgsBasemap = 'http://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer';
-    var urlGeometryService = 'http://localhost:6080/arcgis/rest/services/Utilities/Geometry/GeometryServer';
+    var urlGeometryService = 'http://utility.arcgisonline.com/arcgis/rest/services/Geometry/GeometryServer';
 
     // variable for the name of the reach id field
     var reachIdField = 'awid';
