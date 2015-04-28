@@ -6,7 +6,7 @@ The resources in this repository provide an example of filtering and zooming to 
 
 The primary idea is to facilitate using an iframe to embed a map into a web page. This embedded map will zoom to and display only the features corresponding to the other information contained on the web page. This is accomplished by passing only a unique identifier to the iframe as part of the url and the map displaying the correct features and spatial extent of these features.
 
-A query parameter is anything following a question mark when visiting a web page in the url, such as `http://website.com/place?variable01=rowdy`. The browser ignores anything following the question mark, and we can extract out the value of `variable01` and do something with the string `rowdy`. In this way, we can serve one web page, but make it change using some scripting based on these query parameters.
+A query parameter is anything following a question mark when visiting a web page in the url, such as `http://website.com/place?variable01=rowdy`. The browser ignores anything following the question mark, and we can extract out the value of `variable01` and do something with the string `rowdy`. In this way, we can serve one web page, but make it change using some scripting based on these query parameters. In our case, we can make the map focus on specific features.
  
 ## This Implementation
 
