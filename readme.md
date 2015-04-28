@@ -11,3 +11,10 @@ A query parameter is anything following a question mark when visiting a web page
 ## This Implementation
 
 This specific implementation filters an example service displaying whitewater recreation reaches of river, a stretch of river from a put in location to a take out location. Due to the braided nature of some rivers, multiple line segments can represent one reach. As a result, the logic includes the capability to get the full spatial extent of the features matching the query parameter provided in the url. In this case `reachid` is the query parameter. Based on the specific `reachid` provided, the map will filter the reach line, put in and take out layers, and zoom based on the extent of the reach line features matching the `reachid` provided as a query parameter.
+
+## Live Preview
+
+Here is what the repo looks like on 28 Apr 2015, the results running in on CodePen and using the reachid 2245 for the Sultan River in Washington State.
+
+<iframe height='639' scrolling='no' src='//codepen.io/knu2xs/embed/MwYRYE/?height=639&theme-id=0' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'>See the Pen <a href='http://codepen.io/knu2xs/pen/MwYRYE?reachid=2245'>MwYRYE</a> by Joel McCune (<a href='http://codepen.io/knu2xs'>@knu2xs</a>) on <a href='http://codepen.io'>CodePen</a>.
+</iframe>
