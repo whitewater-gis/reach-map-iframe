@@ -16,5 +16,5 @@ This specific implementation filters an example service displaying whitewater re
 
 Here is what the repo looks like on 28 Apr 2015, the results running in on CodePen and using the reachid 2245 for the Sultan River in Washington State.
 
-<iframe height='639' scrolling='no' src='//codepen.io/knu2xs/embed/MwYRYE/?height=639&theme-id=0' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'>See the Pen <a href='http://codepen.io/knu2xs/pen/MwYRYE?reachid=2245'>MwYRYE</a> by Joel McCune (<a href='http://codepen.io/knu2xs'>@knu2xs</a>) on <a href='http://codepen.io'>CodePen</a>.
-</iframe>
+<p data-height="639" data-theme-id="0" data-slug-hash="MwYRYE" data-default-tab="result" data-user="knu2xs" class='codepen'>See the Pen <a href='http://codepen.io/knu2xs/pen/MwYRYE/'>MwYRYE</a> by Joel McCune (<a href='http://codepen.io/knu2xs'>@knu2xs</a>) on <a href='http://codepen.io'>CodePen</a>.</p>
+<script async src="//assets.codepen.io/assets/embed/ei.js"></script>
