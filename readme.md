@@ -14,7 +14,4 @@ This specific implementation filters an example service displaying whitewater re
 
 ## Live Preview
 
-Here is what the repo looks like on 28 Apr 2015, the results running in on CodePen and using the reachid 2245 for the Sultan River in Washington State.
-
-<iframe height='639' scrolling='no' src='//codepen.io/knu2xs/embed/MwYRYE/?height=639&theme-id=0' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'>See the Pen <a href='http://codepen.io/knu2xs/pen/MwYRYE/'>MwYRYE</a> by Joel McCune (<a href='http://codepen.io/knu2xs'>@knu2xs</a>) on <a href='http://codepen.io'>CodePen</a>.
-</iframe>
+[Here is what the repo looks like on 28 Apr 2015 running in on CodePen and using the reachid 2245 as a query parameter for the Sultan River in Washington State.](http://codepen.io/knu2xs/pen/MwYRYE?reachid=2245) If you want to see how it changes with different reachid's, just change 2245 to 2244 in the url. It will zoom to another reach.
