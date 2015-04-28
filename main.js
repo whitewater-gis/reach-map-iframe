@@ -1,6 +1,6 @@
 // Created by Joel McCune on 27 Apr 2015
 
-// test using reach id 2245, in the form of http://normalUrl.com?reachid=2245
+// test using reach id 2245, in the form of http://websiteUrl.com?reachid=2245
 
 //var url_hydro_overlay = 'http://hydrology.esri.com/arcgis/rest/services/WorldHydroReferenceOverlay/MapServer';
 //var url_reach_points = 'http://services.arcgis.com/SgB3dZDkkUxpEHxu/arcgis/rest/services/aw_reach_17_search/FeatureServer/0';
