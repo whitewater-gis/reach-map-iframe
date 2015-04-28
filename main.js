@@ -2,6 +2,9 @@
 
 // test using reach id 2245, in the form of http://normalUrl.com?reachid=2245
 
+//var url_hydro_overlay = 'http://hydrology.esri.com/arcgis/rest/services/WorldHydroReferenceOverlay/MapServer';
+//var url_reach_points = 'http://services.arcgis.com/SgB3dZDkkUxpEHxu/arcgis/rest/services/aw_reach_17_search/FeatureServer/0';
+
 require([
 
     // esri modules
@@ -9,20 +12,23 @@ require([
     'esri/layers/ArcGISTiledMapServiceLayer',
     'esri/layers/FeatureLayer',
     "esri/geometry/Extent",
+    "esri/tasks/GeometryService",
+    "esri/tasks/ProjectParameters",
+    "esri/geometry/Point",
 
     // dojo modules
     'dojo/io-query',
     'dojo/domReady!'
 
-], function(Map, ArcGISTiledMapServiceLayer, FeatureLayer, Extent, ioQuery) {
+], function(Map, ArcGISTiledMapServiceLayer, FeatureLayer, Extent, GeometryService, ProjectParameters, Point,
+            ioQuery) {
 
     // variables for switching the urls to resources
-    //var url_reach_points = 'http://services.arcgis.com/SgB3dZDkkUxpEHxu/arcgis/rest/services/aw_reach_17_search/FeatureServer/0';
-    var url_reach_hydrolines = 'http://services.arcgis.com/SgB3dZDkkUxpEHxu/arcgis/rest/services/aw_reach_17_search/FeatureServer/3';
-    var url_reach_putins = 'http://services.arcgis.com/SgB3dZDkkUxpEHxu/arcgis/rest/services/aw_reach_17_search/FeatureServer/1';
-    var url_reach_takeouts = 'http://services.arcgis.com/SgB3dZDkkUxpEHxu/arcgis/rest/services/aw_reach_17_search/FeatureServer/2';
-    //var url_hydro_overlay = 'http://hydrology.esri.com/arcgis/rest/services/WorldHydroReferenceOverlay/MapServer';
-    var url_usgs_basemap = 'http://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer';
+    var urlReachHydrolines = 'http://services.arcgis.com/SgB3dZDkkUxpEHxu/arcgis/rest/services/aw_reach_17_search/FeatureServer/3';
+    var urlReachPutins = 'http://services.arcgis.com/SgB3dZDkkUxpEHxu/arcgis/rest/services/aw_reach_17_search/FeatureServer/1';
+    var urlReachTakeouts = 'http://services.arcgis.com/SgB3dZDkkUxpEHxu/arcgis/rest/services/aw_reach_17_search/FeatureServer/2';
+    var urlUsgsBasemap = 'http://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer';
+    var urlGeometryService = 'http://localhost:6080/arcgis/rest/services/Utilities/Geometry/GeometryServer';
 
     // variable for the name of the reach id field
     var reachIdField = 'awid';
@@ -47,43 +53,96 @@ require([
     var map = new Map('map-div');
 
     // create a basemap layer and add it to the map
-    var layer_usgs_basemap = new ArcGISTiledMapServiceLayer(url_usgs_basemap);
-    map.addLayer(layer_usgs_basemap);
+    var layerUsgsBasemap = new ArcGISTiledMapServiceLayer(urlUsgsBasemap);
+    map.addLayer(layerUsgsBasemap);
 
     // create a feature layer for each feature reach layer
-    var layer_reach_hydrolines = new FeatureLayer(url_reach_hydrolines);
-    var layer_reach_putins = new FeatureLayer(url_reach_putins);
-    var layer_reach_takeouts = new FeatureLayer(url_reach_takeouts);
+    var layerReachHydrolines = new FeatureLayer(urlReachHydrolines);
+    var layerReachPutins = new FeatureLayer(urlReachPutins);
+    var layerReachTakeouts = new FeatureLayer(urlReachTakeouts);
 
     // create a list of reach features
-    var layer_list_reach = [
-        layer_reach_hydrolines,
-        layer_reach_putins,
-        layer_reach_takeouts
+    var layerListReach = [
+        layerReachHydrolines,
+        layerReachPutins,
+        layerReachTakeouts
     ];
 
     // use a definition expression to only show the reach matching the reach id for all reach layers
-    layer_reach_hydrolines.setDefinitionExpression(reachIdField + " LIKE '%" + reachId + "'");
-    layer_reach_putins.setDefinitionExpression("putin LIKE '%" + reachId + "'");
-    layer_reach_takeouts.setDefinitionExpression("takeout LIKE '%" + reachId + "'");
+    layerReachHydrolines.setDefinitionExpression(reachIdField + " LIKE '%" + reachId + "'");
+    layerReachPutins.setDefinitionExpression("putin LIKE '%" + reachId + "'");
+    layerReachTakeouts.setDefinitionExpression("takeout LIKE '%" + reachId + "'");
 
     // add all three reach layers to the map
-    for (var i = 0; i < layer_list_reach.length; i++){
-        map.addLayer(layer_list_reach[i]);
+    for (var i = 0; i < layerListReach.length; i++){
+        map.addLayer(layerListReach[i]);
     }
 
-    // use query extent to get the extent of the definition query features (AGOL FeatureLayer only functionality)
-    layer_reach_hydrolines.queryExtent(reachIdField + " LIKE '%" + reachId + "'", function(queryExtent){
+    // wait for the map to load so the layer properties will be available
+    map.on('load', function() {
 
-        // cheat a little, NAD83 and WGS84 are close enough to use for this purpose
-        var this_extent = new Extent({
-            xmin: queryExtent.extent.xmin,
-            ymin: queryExtent.extent.ymin,
-            xmax: queryExtent.extent.xmax,
-            ymax: queryExtent.extent.ymax
+        // select the reach hydroline segments
+        var queryFeatures = layerReachHydrolines.queryFeatures(reachIdField + " LIKE '%" + reachId + "'");
+
+        // query promise
+        queryFeatures.then(function(selectList){
+
+            // get the list of feature objects
+            featureList = selectList.features;
+
+            // extent object to use for setting extent, initialized to first feature extent
+            var extentNad83 = featureList[0].geometry.getExtent();
+
+            // iterate the feature objects
+            for (var i = 0; i < featureList.length; i++){
+
+                // get the extent of the current feature
+                var thisExtent = featureList[i].geometry.getExtent();
+
+                // if the minimums or maximums for this features are less than the initial, update extent
+                if (thisExtent.xmin < extentNad83.xmin){
+                    extentNad83.update(thisExtent.xmin, extentNad83.ymin, extentNad83.xmax, extentNad83.ymax,
+                        extentNad83.spatialReference);
+                }
+                if (thisExtent.ymin < extentNad83.ymin){
+                    extentNad83.update(extentNad83.xmin, thisExtent.ymin, extentNad83.xmax, extentNad83.ymax,
+                        extentNad83.spatialReference);
+                }
+                if (thisExtent.xmax > extentNad83.xmax){
+                    extentNad83.update(extentNad83.xmin, extentNad83.ymin, thisExtent.xmax, extentNad83.ymax,
+                        extentNad83.spatialReference);
+                }
+                if (thisExtent.ymax > extentNad83.ymax) {
+                    extentNad83.update(extentNad83.xmin, extentNad83.ymin, extentNad83.xmax, thisExtent.ymax,
+                        extentNad83.spatialReference);
+                }
+            }
+
+            // set up parameters for transforming extent coordinates
+            var projectParameters = new ProjectParameters();
+            projectParameters.geometries = [
+                new Point(extentNad83.xmin, extentNad83.ymin, extentNad83.spatialReference),
+                new Point(extentNad83.xmax, extentNad83.ymax, extentNad83.spatialReference)
+            ];
+            projectParameters.outSR = map.spatialReference;
+
+            // set up the geometry service object
+            var geometryService = new GeometryService(urlGeometryService);
+
+            // transform extent to WGS84 using the geometry service
+            var transform = geometryService.project(projectParameters);
+
+            // provide promise for when transform finishes
+            transform.then(function(pointsExtent){
+
+                // create a new extent object to zoom to
+                var extentWgs84 = new Extent(
+                    pointsExtent[0].x, pointsExtent[0].y, pointsExtent[1].x, pointsExtent[1].y, map.spatialReference
+                );
+
+                // set the map extent to the reach extent
+                map.setExtent(extentWgs84, true);
+            });
         });
-
-        // use the extent to zoom the map to the reach
-        map.setExtent(this_extent, true);
     });
 });
