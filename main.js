@@ -6,6 +6,7 @@ require([
 
     // esri modules
     'esri/map',
+    'esri/layers/ArcGISTiledMapServiceLayer',
     'esri/layers/FeatureLayer',
     "esri/geometry/Extent",
 
@@ -13,7 +14,7 @@ require([
     'dojo/io-query',
     'dojo/domReady!'
 
-], function(Map, FeatureLayer, Extent, ioQuery) {
+], function(Map, ArcGISTiledMapServiceLayer, FeatureLayer, Extent, ioQuery) {
 
     // variables for switching the urls to resources
     //var url_reach_points = 'http://services.arcgis.com/SgB3dZDkkUxpEHxu/arcgis/rest/services/aw_reach_17_search/FeatureServer/0';
@@ -21,6 +22,7 @@ require([
     var url_reach_putins = 'http://services.arcgis.com/SgB3dZDkkUxpEHxu/arcgis/rest/services/aw_reach_17_search/FeatureServer/1';
     var url_reach_takeouts = 'http://services.arcgis.com/SgB3dZDkkUxpEHxu/arcgis/rest/services/aw_reach_17_search/FeatureServer/2';
     //var url_hydro_overlay = 'http://hydrology.esri.com/arcgis/rest/services/WorldHydroReferenceOverlay/MapServer';
+    var url_usgs_basemap = 'http://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer';
 
     // variable for the name of the reach id field
     var reachIdField = 'awid';
@@ -35,59 +37,18 @@ require([
         var query = url.substring(url.indexOf('?') + 1, url.length);
 
         // use ioQuery to convert the query string to a JSON object, access the reachid key and return the reachid
-        return ioQuery.queryToObject(query)['reachid'];
-    }
-
-    // query the layer using the reach id and get the extent of all the features
-    function getQueryExtent(layer, reachField, reachId){
-
-        // select the features matching the reach id
-        layer.selectFeatures(
-
-            // create query string
-            reachField + " LIKE '%" + reachId + "'",
-
-            // create a new selection
-            FeatureLayer.SELECTION_NEW,
-
-            // once the features are selected, invoke the callback
-            function(selectedFeatures){
-
-                // set initial bounds to extent of first object
-                var first_extent = selectedFeatures[0].geometry.getExtent();
-                var reach_xmin = first_extent.xmin,
-                    reach_ymin = first_extent.ymin,
-                    reach_xmax = first_extent.xmax,
-                    reach_ymax = first_extent.ymax;
-
-                // loop through all the selected features
-                for (var i = 0; i < selectedFeatures.length; i++){
-
-                    // save this feature extent to a variable
-                    var extent_this = selectedFeatures[i].geometry.getExtent();
-
-                    // if the minimums are less than the previously saved values
-                    if (extent_this.xmin < reach_xmin){ reach_xmin = extent_this.xmin; }
-                    if (extent_this.ymin < reach_ymin){ reach_ymin = extent_this.ymin; }
-
-                    // if the maximums are more than the previously saved values
-                    if (extent_this.xmax > reach_xmax){ reach_xmax = extent_this.xmax; }
-                    if (extent_this.ymax > reach_ymax){ reach_ymax = extent_this.ymax; }
-                }
-
-                // return a new extent object from the results with the maximum extents
-                return new Extent({'xmin': reach_xmin, 'ymin': reach_ymin, 'xmax': reach_xmax, 'ymax': reach_ymax});
-            }
-        );
+        return ioQuery.queryToObject(query).reachid;
     }
 
     // get the reachid from the query string
     var reachId = getReachId();
 
     // create map object
-    var map = new Map('map-div', {
-        basemap: 'dark-gray'
-    });
+    var map = new Map('map-div');
+
+    // create a basemap layer and add it to the map
+    var layer_usgs_basemap = new ArcGISTiledMapServiceLayer(url_usgs_basemap);
+    map.addLayer(layer_usgs_basemap);
 
     // create a feature layer for each feature reach layer
     var layer_reach_hydrolines = new FeatureLayer(url_reach_hydrolines);
@@ -111,6 +72,18 @@ require([
         map.addLayer(layer_list_reach[i]);
     }
 
-    // set the extent of the map to the extent of the hydroline geometry
-    map.setExtent(getQueryExtent(layer_reach_hydrolines, reachIdField, reachId));
+    // use query extent to get the extent of the definition query features (AGOL FeatureLayer only functionality)
+    layer_reach_hydrolines.queryExtent(reachIdField + " LIKE '%" + reachId + "'", function(queryExtent){
+
+        // cheat a little, NAD83 and WGS84 are close enough to use for this purpose
+        var this_extent = new Extent({
+            xmin: queryExtent.extent.xmin,
+            ymin: queryExtent.extent.ymin,
+            xmax: queryExtent.extent.xmax,
+            ymax: queryExtent.extent.ymax
+        });
+
+        // use the extent to zoom the map to the reach
+        map.setExtent(this_extent, true);
+    });
 });
