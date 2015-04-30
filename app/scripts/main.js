@@ -56,6 +56,9 @@ require([
   var layerUsgsBasemap = new ArcGISTiledMapServiceLayer(urlUsgsBasemap);
   map.addLayer(layerUsgsBasemap);
 
+  // center the map at Meades Ranch, KS to start...just for fun
+  map.centerAndZoom(Point(-98.5420115, 39.233343), 5);
+
   // create a feature layer for each feature reach layer
   var layerReachPoints = new FeatureLayer(urlReachPoints);
   var layerReachHydrolines = new FeatureLayer(urlReachHydrolines);
