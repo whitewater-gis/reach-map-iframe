@@ -71,6 +71,7 @@ require([
   ];
 
   // use a definition expression to only show the reach matching the reach id for all reach layers
+  layerReachPoints.setDefinitionExpression(reachIdField + " LIKE '%" + reachId + "'");
   layerReachHydrolines.setDefinitionExpression(reachIdField + " LIKE '%" + reachId + "'");
   layerReachPutins.setDefinitionExpression("putin LIKE '%" + reachId + "'");
   layerReachTakeouts.setDefinitionExpression("takeout LIKE '%" + reachId + "'");
