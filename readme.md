@@ -16,7 +16,7 @@ This specific implementation filters an example service displaying whitewater re
 
 This repo was built using the [Yeoman](http://yeoman.io/) [WebApp generator](https://github.com/yeoman/generator-webapp). To use this repo you will need either [Node.js](https://nodejs.org/) or [io.js](https://iojs.org/en/index.html) installed on your machine. With this installed, you will also need two other packages installed globally, so you can access them no matter what directory you are in. These include [Grunt](http://gruntjs.com/) and [Bower](http://bower.io/). To install these, open a command prompt and type:
  
-     > npm install -g grunt-cli bower
+    > npm install -g grunt-cli bower
      
 After downloading this repo, again from the command line and in the local repo directory, type:
 
@@ -31,7 +31,7 @@ This will open a new tab in your default browser and reload it every time you ma
 
 Once you are satisfied with your work and want to package up everything for deployment, run a build and copy the results out of the `dist` directory. Run the build by typing the following at the command line:
 
-  > grunt build
+    > grunt build
   
 This will take all your files, optimize them and put them into a new directory named `dist`. The HTML and CSS is condensed. The JavaScript is uglified. All space and comments are removed. Variables are renamed to one letter. Everything is reduced to minimal, but it all still will work. To deploy your new web mapping application, just grab the contents of this `dist` directory and put it on your web server.
 
