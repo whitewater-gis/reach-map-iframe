@@ -1,4 +1,4 @@
-# Reach Map Iframe
+# Reach Map IFrame
 
 The resources in this repository provide an example of filtering and zooming to features based on a unique value provided as a query parameter in the url.
 
